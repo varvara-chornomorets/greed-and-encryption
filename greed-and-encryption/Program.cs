@@ -1,4 +1,6 @@
-﻿Console.WriteLine(Directory.GetCurrentDirectory());
+﻿using greed_and_encryption;
+
+Console.WriteLine(Directory.GetCurrentDirectory());
 // sorry, i didn't manage to make not absolute path work, so i use absolute,
 // which is different for you
 
@@ -20,11 +22,22 @@ foreach(var line in lines)
     }
 }
 
-PriorityQueue<KeyValuePair<char, int>, int> huffmanTree = new PriorityQueue<KeyValuePair<char, int>, int>();
+PriorityQueue<Node, int> huffmanTree = new PriorityQueue<Node, int>();
 foreach (var element in frequencies)
 {
-    huffmanTree.Enqueue(element, element.Value);
+    huffmanTree.Enqueue( new Node(element.Value, element.Key, null, null),element.Key );
 }
+
+
+
+
+
+
+
+
+
+
+
 
 foreach (var element in frequencies)
 {

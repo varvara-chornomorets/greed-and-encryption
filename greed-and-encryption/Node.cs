@@ -2,7 +2,7 @@
 
 public class Node
 {
-    public Node(int frequency, string character, Node? rightChild, Node? leftchild)
+    public Node(int frequency, char? character, Node? rightChild, Node? leftchild)
     {
         Frequency = frequency;
         Character = character;
@@ -11,14 +11,14 @@ public class Node
     }
 
     public int Frequency { get; set; }
-    public string Character { get; set; }
+    public char? Character { get; set; }
     public Node? RightChild { get; set; }
     public Node? Leftchild { get; set; }
 
     public Node Merge(Node first, Node second)
     {
         return new Node(first.Frequency + second.Frequency, 
-            first.Character + second.Character, 
+            null, 
             second, first);
     }
     
