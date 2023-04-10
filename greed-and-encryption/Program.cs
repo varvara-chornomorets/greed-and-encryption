@@ -6,16 +6,18 @@ string OutPutFilePath = @"C:\Users\Elisa\RiderProjects\Greed-and-encryption\Gree
 
 string DecodedOutPutFilePath = @"C:\Users\Elisa\RiderProjects\Greed-and-encryption\Greed and encryption\decoded.txt";
 
-string fileContent = File.ReadAllText(InputFilePath);
 
-HuffmanTree huffmanTree = new HuffmanTree(fileContent);
+//string fileContent = File.ReadAllText(InputFilePath);
+
+string test = "DAADCAKRBPPCK";
+
+HuffmanTree huffmanTree = new HuffmanTree(test);
 
 huffmanTree.PrintEncodingTable();
 
-
 Console.WriteLine("\n");
 
-string encodedText = huffmanTree.Encode(fileContent);
+string encodedText = huffmanTree.Encode(test);
 Console.WriteLine("Encoded text: " + encodedText + "\n");
 
 string decodedText = huffmanTree.Decode(encodedText);

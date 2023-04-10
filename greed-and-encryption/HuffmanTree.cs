@@ -59,7 +59,7 @@
 			
 			if (node == null)
 			{
-				return;
+				return; 
 			}
 
 			// If the node is a leaf node, add its binary encoding to the encoding table
@@ -67,12 +67,15 @@
 			{
 				encodingTable[node.Symbol] = prefix;
 			}
-			// recursively call the helper method on the left and right child nodes, appending '0' or '1' to the prefix as needed
+			
+			// recursively call the helper method on the left and right child nodes, appending '0' or '1'
+			// to the prefix as needed
 			else
 			{
-				BuildEncodingTable(node.LeftChild, prefix + "0", encodingTable);
-				BuildEncodingTable(node.RightChild, prefix + "1", encodingTable);
+				BuildEncodingTable(node.LeftChild, prefix + "1", encodingTable);
+				BuildEncodingTable(node.RightChild, prefix + "0", encodingTable);
 			}
+			
 		}
 
 
@@ -91,8 +94,7 @@
 
 			return encodedText;
 		}
-
-
+		
 		public string Decode(string encodedText)
 		{
 			string decodedText = "";
@@ -101,11 +103,11 @@
 			// Traverse the Huffman tree based on the bits in the encoded text
 			foreach (char bit in encodedText)
 			{
-				if (bit == '0')
+				if (bit == '1')
 				{
 					current = current.LeftChild;
 				}
-				else if (bit == '1')
+				else if (bit == '0')
 				{
 					current = current.RightChild;
 				}
@@ -121,8 +123,7 @@
 
 			return decodedText;
 		}
-
-
+		
 		public string EncodeToFile(string inputFilePath, string outputFilePath)
 		{
 			// Read the input text from the file
