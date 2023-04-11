@@ -25,7 +25,13 @@ foreach(var line in lines)
 PriorityQueue<Node, int> huffmanTree = new PriorityQueue<Node, int>();
 foreach (var element in frequencies)
 {
-    huffmanTree.Enqueue( new Node(element.Value, element.Key, null, null),element.Key );
+    huffmanTree.Enqueue( new Node(element.Value, element.Key, null, null),element.Value );
+}
+
+while (huffmanTree.Count > 0)
+{
+    Node node =  huffmanTree.Dequeue();
+    Console.WriteLine($"{node.Character} + {node.Frequency}");
 }
 
 
@@ -37,9 +43,7 @@ foreach (var element in frequencies)
 
 
 
-
-
-foreach (var element in frequencies)
+/* foreach (var element in frequencies)
 {
     Console.WriteLine(element);
 }
@@ -54,3 +58,4 @@ for (int i = 0; i < frequencies.Count; i++)
 {
     Console.WriteLine(huffmanTree.Dequeue());
 }
+*/
