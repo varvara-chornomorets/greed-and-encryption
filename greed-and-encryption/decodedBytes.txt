@@ -1,1 +1,1 @@
-this is an example text to encode and decode using Huffman Tree 
+this is an example text to encode and decode using Huffman Tree

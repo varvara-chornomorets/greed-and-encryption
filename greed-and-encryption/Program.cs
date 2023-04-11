@@ -1,31 +1,42 @@
 ﻿using Greed_and_encryption;
 
-string InputFilePath = @"C:\Users\Elisa\RiderProjects\Greed-and-encryption\Greed and encryption\SherLocked.txt";
+string InputFilePath = @"C:\Users\Elisa\RiderProjects\greed-and-encryption\greed-and-encryption\SherLocked.txt";
 
-string OutPutFilePath = @"C:\Users\Elisa\RiderProjects\Greed-and-encryption\Greed and encryption\encoded.txt";
+string EncodedFilePath = @"C:\Users\Elisa\RiderProjects\greed-and-encryption\greed-and-encryption\encoded.txt";
 
-string DecodedOutPutFilePath = @"C:\Users\Elisa\RiderProjects\Greed-and-encryption\Greed and encryption\decoded.txt";
+string EncodedBytesFilePath = @"C:\Users\Elisa\RiderProjects\greed-and-encryption\greed-and-encryption\encodedBytes.txt";
 
+string DecodedFilePath = @"C:\Users\Elisa\RiderProjects\greed-and-encryption\greed-and-encryption\decoded.txt";
 
-//string fileContent = File.ReadAllText(InputFilePath);
+string DecodedBytesFilePath = @"C:\Users\Elisa\RiderProjects\greed-and-encryption\greed-and-encryption\decodedBytes.txt";
 
-string test = "DAADCAKRBPPCK";
+string fileContent = File.ReadAllText(InputFilePath);
 
-HuffmanTree huffmanTree = new HuffmanTree(test);
+HuffmanTree huffmanTree = new HuffmanTree(fileContent);
 
 huffmanTree.PrintEncodingTable();
 
+
 Console.WriteLine("\n");
 
-string encodedText = huffmanTree.Encode(test);
+string encodedText = huffmanTree.Encode(fileContent);
 Console.WriteLine("Encoded text: " + encodedText + "\n");
 
 string decodedText = huffmanTree.Decode(encodedText);
-Console.WriteLine("Decoded text: " + decodedText + "\n");
+Console.WriteLine("Decoded text using Decode: " + decodedText );
 
+//Chars
+huffmanTree.EncodeToFile(InputFilePath, EncodedFilePath);
 
-//string encodeToFile = huffmanTree.EncodeToFile(InputFilePath, OutPutFilePath);
-//Console.WriteLine("Encoded file written to " + encodeToFile);
+string decodedFromFile = huffmanTree.DecodeFromFile(EncodedFilePath);
+Console.WriteLine("Decoded text using DecodeFromFile: " + decodedFromFile + "\n");
 
-//string decodeToFile = huffmanTree.DecodeFromFile(OutPutFilePath, DecodedOutPutFilePath);
-//Console.WriteLine("Decoded text from file: " + decodeToFile);
+huffmanTree.DecodeFromFileToFile(EncodedFilePath, DecodedFilePath);
+
+//Bytes
+huffmanTree.EncodeBytesToFile(InputFilePath, EncodedBytesFilePath);
+
+string decodedBytesFromFile = huffmanTree.DecodeBytesFromFile(EncodedBytesFilePath);
+Console.WriteLine("Decoded text using DecodeBytesFromFile: " + decodedBytesFromFile + "\n");
+
+huffmanTree.DecodeBytesFromFileToFile(EncodedBytesFilePath, DecodedBytesFilePath);
