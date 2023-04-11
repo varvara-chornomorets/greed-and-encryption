@@ -124,7 +124,7 @@
 			return decodedText;
 		}
 		
-		public string EncodeToFile(string inputFilePath, string outputFilePath)
+		public void EncodeToFile(string inputFilePath, string outputFilePath)
 		{
 			// Read the input text from the file
 			string text = File.ReadAllText(inputFilePath);
@@ -139,78 +139,135 @@
 			// Write the encoded text and the encoding table to the output file
 			using (StreamWriter writer = new StreamWriter(outputFilePath))
 			{
-				// Write the encoded text to the file
-				writer.WriteLine(encodedText);
-				writer.WriteLine($"\n");
 				// Write the encoding table to the file
 				foreach (KeyValuePair<char, string> entry in encodingTable)
 				{
 					writer.WriteLine($"{entry.Key}:{entry.Value}");
 				}
+				
+				// Write the encoded text to the file
+				writer.WriteLine(encodedText);
 			}
-
-			// Return the path of the output file
-			return outputFilePath;
 		}
 
-
-		public string DecodeFromFile(string inputFilePath, string outputFilePath)
+		public void EncodeBytesToFile(string inputFilePath, string outputFilePath)
 		{
-			// Read the encoded text and the encoding table from the file
-			string encodedText = "";
+			using (var reader = new StreamReader(inputFilePath))
+			using (var writer = new BinaryWriter(new FileStream(outputFilePath, FileMode.Create)))
+			{
+
+				string input = reader.ReadToEnd();
+
+				// applying Huffman encoding to the string
+				string encoded = Encode(input);
+
+				// write down the length of the encoded text so that you can decode it correctly later
+				writer.Write(encoded.Length);
+
+				//  write the encoded text to a binary file
+				for (int i = 0; i < encoded.Length; i += 8)
+				{
+					string chunk = encoded.Substring(i, Math.Min(8, encoded.Length - i));
+					byte b = Convert.ToByte(chunk.PadRight(8, '0'), 2);
+					writer.Write(b);
+				}
+			}
+		}
+		
+		public string DecodeFromFile(string inputFilePath)
+		{
 			Dictionary<string, char> decodingTable = new Dictionary<string, char>();
+			string encodedText = "";
+			char[] Trimchar = { ' ', ':' };
 			using (StreamReader reader = new StreamReader(inputFilePath))
 			{
-				// Read the encoded text from the file
-				encodedText = reader.ReadLine();
-
-				// Read the encoding table from the file
 				string line;
 				while ((line = reader.ReadLine()) != null)
 				{
-					if (line == "") // skip empty line
-						continue;
-
-					string[] parts = line.Split(':');
-					char symbol = parts[0][0];
-					string code = parts[1];
-					decodingTable[code] = symbol;
+					// Check if the line contains a key-value pair for the decoding table
+					int separatorIndex = line.IndexOf(':');
+					if (separatorIndex != -1)
+					{
+						char key = line[0];
+						string value = line.Substring(separatorIndex + 1);
+						decodingTable[value] = key;
+					}
+					else
+					{
+						// The line contains the encoded text
+						encodedText += line;
+					}
 				}
 			}
 
-			// Decode the text
+			// Decode the text using the decoding table
 			string decodedText = "";
 			string prefix = "";
-			foreach (char bit in encodedText)
+			foreach (char elem in encodedText)
 			{
-				prefix += bit;
+				prefix += elem;
 				if (decodingTable.ContainsKey(prefix))
 				{
-					char symbol = decodingTable[prefix];
-					decodedText += symbol;
+					decodedText += decodingTable[prefix];
 					prefix = "";
 				}
 			}
 
-			// Write the decoded text to the output file
-			File.WriteAllText(outputFilePath, decodedText);
+			return decodedText.TrimEnd(Trimchar);
+		}
 
-			// Return the path of the output file
-			return outputFilePath;
+		public void DecodeFromFileToFile(string inputFilePath, string outputFilePath)
+		{
+			string decoded = DecodeFromFile(inputFilePath);
+
+			File.WriteAllText(outputFilePath, decoded);
 		}
 
 
+		public string DecodeBytesFromFile(string inputFilePath)
+		{
+			using (var reader = new BinaryReader(new FileStream(inputFilePath, FileMode.Open)))
+			{
+				// зчитуємо довжину закодованого тексту, яку ми записали під час кодування
+				int encodedLength = reader.ReadInt32();
+
+				// зчитуємо закодований текст з бінарного файлу
+				byte[] bytes = reader.ReadBytes((int) Math.Ceiling((double) encodedLength / 8));
+				string encoded = "";
+				for (int i = 0; i < bytes.Length; i++)
+				{
+					encoded += Convert.ToString(bytes[i], 2).PadLeft(8, '0');
+				}
+
+				encoded = encoded.Substring(0, encodedLength);
+
+				// розкодовуємо закодований текст
+				string decoded = Decode(encoded);
+				return decoded;
+			}
+		}
+
+		public void DecodeBytesFromFileToFile(string inputFilePath, string outputFilePath)
+			{
+				string decoded = DecodeBytesFromFile(inputFilePath);
+
+				File.WriteAllText(outputFilePath, decoded);
+
+			}
+				
 		public void PrintEncodingTable()
 		{
 			Dictionary<char, string> encodingTable = BuildEncodingTable();
-
 			Console.WriteLine("Encoding Table:");
 			foreach (KeyValuePair<char, string> entry in encodingTable)
 			{
 				Console.WriteLine($"   {entry.Key} : {entry.Value}");
 			}
-				
+
 		}
+
+
+
 	}
 
 
