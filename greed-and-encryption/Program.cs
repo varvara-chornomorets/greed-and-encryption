@@ -1,10 +1,10 @@
 ﻿using System.Data;
 using greed_and_encryption;
 
-Dictionary<char, int> GetFreqeunciesDictionary(string path)
+Dictionary<char?, int> GetFreqeunciesDictionary(string path)
 {
     string[] lines = File.ReadAllLines(path);
-    Dictionary<char, int> frequencies = new Dictionary<char, int>();
+    Dictionary<char?, int> frequencies = new Dictionary<char?, int>();
     foreach(var line in lines)
     {
         foreach (var c in line)
@@ -23,7 +23,7 @@ Dictionary<char, int> GetFreqeunciesDictionary(string path)
     return frequencies;
 }
 
-Dictionary<char?, string> GetCodesForEachSymbol(Dictionary<char, int> frequenciesDictionary)
+Node GetRoot(Dictionary<char?, int> frequenciesDictionary)
 {
     PriorityQueue<Node, int> huffmanTree = new PriorityQueue<Node, int>();
     foreach (var element in frequenciesDictionary)
@@ -41,7 +41,7 @@ Dictionary<char?, string> GetCodesForEachSymbol(Dictionary<char, int> frequencie
     }
 
     Node root = merged;
-    return GetPrefixCodesFromRoot(root);
+    return root;
 }
 
 Dictionary<char?, string> GetPrefixCodesFromRoot(Node root)
@@ -70,9 +70,20 @@ Dictionary<char?, string> GetPrefixCodesFromRoot(Node root)
 
 
 
-var frequencies = GetFreqeunciesDictionary("sherlock.txt");
-var prefixCodes = GetCodesForEachSymbol(frequencies);
-foreach (var pair in prefixCodes)
+void EncodeToString(string inputFilePath, string outputFilePath)
 {
-    Console.WriteLine($"element is {pair.Key} and prefix code is {pair.Value}");
+    var frequencies = GetFreqeunciesDictionary(inputFilePath);
+    var prefixCodesRoot = GetRoot(frequencies);
+    var prefixCodes = GetPrefixCodesFromRoot(prefixCodesRoot);
+    using (StreamWriter writer = new StreamWriter("example.txt"))
+    {
+        foreach (var pair in prefixCodes)
+        {
+            
+        }
+    }
+
 }
+
+
+EncodeToString("sherlock.txt", "sfmkd");
