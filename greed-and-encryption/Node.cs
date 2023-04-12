@@ -15,11 +15,11 @@ public class Node
     public Node? RightChild { get; set; }
     public Node? Leftchild { get; set; }
 
-    public Node Merge(Node first, Node second)
+    public Node Merge(Node given)
     {
-        return new Node(first.Frequency + second.Frequency, 
+        return new Node(given.Frequency + this.Frequency, 
             null, 
-            second, first);
+            given, this);
     }
     
 }

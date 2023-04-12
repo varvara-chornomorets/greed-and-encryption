@@ -1,26 +1,28 @@
 ﻿using greed_and_encryption;
 
-Console.WriteLine(Directory.GetCurrentDirectory());
-// sorry, i didn't manage to make not absolute path work, so i use absolute,
-// which is different for you
-
-string variaPath = "C:/Users/chorn/Desktop/it/greed-and-encryption/greed-and-encryption/sherlock.txt";
-string[] lines = File.ReadAllLines(variaPath);
-Dictionary<char, int> frequencies = new Dictionary<char, int>();
-foreach(var line in lines)
+Dictionary<char, int> GetFreqeunciesDictionary(string path)
 {
-    foreach (var c in line)
+    string[] lines = File.ReadAllLines(path);
+    Dictionary<char, int> frequencies = new Dictionary<char, int>();
+    foreach(var line in lines)
     {
-        try
+        foreach (var c in line)
         {
-            frequencies[c] += 1;
-        }
-        catch(Exception ex)
-        {
-            frequencies[c] = 1;
+            try
+            {
+                frequencies[c] += 1;
+            }
+            catch(Exception ex)
+            {
+                frequencies[c] = 1;
+            }
         }
     }
+
+    return frequencies;
 }
+
+Dictionary<char, int> frequencies = GetFreqeunciesDictionary("sherlock.txt");
 
 PriorityQueue<Node, int> huffmanTree = new PriorityQueue<Node, int>();
 foreach (var element in frequencies)
@@ -28,11 +30,15 @@ foreach (var element in frequencies)
     huffmanTree.Enqueue( new Node(element.Value, element.Key, null, null),element.Value );
 }
 
-while (huffmanTree.Count > 0)
+while (huffmanTree.Count > 1)
 {
-    Node node =  huffmanTree.Dequeue();
-    Console.WriteLine($"{node.Character} + {node.Frequency}");
+    Node curLeft =  huffmanTree.Dequeue();
+    Node curRight = huffmanTree.Dequeue();
+    Node merged = curLeft.Merge(curRight);
+    huffmanTree.Enqueue(merged, merged.Frequency);
+    Console.WriteLine(merged.Frequency);
 }
+
 
 
 
