@@ -3,24 +3,26 @@ using greed_and_encryption;
 
 Dictionary<char?, int> GetFreqeunciesDictionary(string path)
 {
-    string[] lines = File.ReadAllLines(path);
+    using StreamReader reader = new StreamReader(path);
+    
+    string text = reader.ReadToEnd();
+    
     Dictionary<char?, int> frequencies = new Dictionary<char?, int>();
-    foreach(var line in lines)
+
+    foreach (var c in text)
     {
-        foreach (var c in line)
+        try
         {
-            try
-            {
-                frequencies[c] += 1;
-            }
-            catch(Exception ex)
-            {
-                frequencies[c] = 1;
-            }
+            frequencies[c] += 1;
+        }
+        catch(Exception ex)
+        {
+            frequencies[c] = 1;
         }
     }
 
     return frequencies;
+    reader.Close();
 }
 
 Node GetRoot(Dictionary<char?, int> frequenciesDictionary)
@@ -75,17 +77,48 @@ void EncodeToString(string inputFilePath, string outputFilePath)
     var frequencies = GetFreqeunciesDictionary(inputFilePath);
     var prefixCodesRoot = GetRoot(frequencies);
     var prefixCodes = GetPrefixCodesFromRoot(prefixCodesRoot);
-    using (StreamWriter writer = new StreamWriter("example.txt"))
+    using (StreamWriter writer = new StreamWriter(outputFilePath))
     {
         foreach (var pair in prefixCodes)
         {
             char c = pair.Key.Value;
             string asciiBinary = Convert.ToString(c, 2);
+            for (int i = 0; i < 8 - asciiBinary.Length; i++)
+            {
+                asciiBinary = "0" + asciiBinary;
+            }
             writer.Write(asciiBinary, prefixCodes[c]);
         }
-        writer.Write("00000000");
+        writer.Write("aaaaaaaa");
+    
+
+        using StreamReader reader = new StreamReader(inputFilePath) ;
+        var text = reader.ReadToEnd();
+        foreach (var c in text)
+        {
+            writer.Write(prefixCodes[c]);
+        }
+        reader.Close();
     }
 }
 
+void DecodeString(string fileToDecodePath, string outputFilePath)
+{
+    using StreamReader reader = new StreamReader(fileToDecodePath);
+    var content = reader.ReadToEnd();
+    var cur = "";
+    int counter = 1;
+    while (cur != "aaaaaaaa")
+    {
+        cur = content.Substring(8 * (counter-1), 8);
+        counter++;
+        Console.WriteLine(cur);
 
-EncodeToString("sherlock.txt", "sfmkd");
+    }
+
+
+}
+
+
+// EncodeToString("sherlock.txt", "example.txt");
+// DecodeString("example.txt", "decoded.txt");
