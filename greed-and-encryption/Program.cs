@@ -1,4 +1,5 @@
-﻿using greed_and_encryption;
+﻿using System.Data;
+using greed_and_encryption;
 
 Dictionary<char, int> GetFreqeunciesDictionary(string path)
 {
@@ -22,46 +23,56 @@ Dictionary<char, int> GetFreqeunciesDictionary(string path)
     return frequencies;
 }
 
-Dictionary<char, int> frequencies = GetFreqeunciesDictionary("sherlock.txt");
-
-PriorityQueue<Node, int> huffmanTree = new PriorityQueue<Node, int>();
-foreach (var element in frequencies)
+Dictionary<char?, string> GetCodesForEachSymbol(Dictionary<char, int> frequenciesDictionary)
 {
-    huffmanTree.Enqueue( new Node(element.Value, element.Key, null, null),element.Value );
+    PriorityQueue<Node, int> huffmanTree = new PriorityQueue<Node, int>();
+    foreach (var element in frequenciesDictionary)
+    {
+        huffmanTree.Enqueue( new Node(element.Value, element.Key, null, null),element.Value );
+    }
+
+    Node merged = new Node(0, null, null, null);
+    while (huffmanTree.Count > 1)
+    {
+        Node curLeft =  huffmanTree.Dequeue();
+        Node curRight = huffmanTree.Dequeue();
+        merged = curLeft.Merge(curRight);
+        huffmanTree.Enqueue(merged, merged.Frequency);
+    }
+
+    Node root = merged;
+    return GetPrefixCodesFromRoot(root);
 }
 
-while (huffmanTree.Count > 1)
+Dictionary<char?, string> GetPrefixCodesFromRoot(Node root)
 {
-    Node curLeft =  huffmanTree.Dequeue();
-    Node curRight = huffmanTree.Dequeue();
-    Node merged = curLeft.Merge(curRight);
-    huffmanTree.Enqueue(merged, merged.Frequency);
-    Console.WriteLine(merged.Frequency);
+    var result = new Dictionary<char?, string>();
+    Stack<Node> stack = new Stack<Node>();
+    stack.Push(root);
+    
+    while (stack.Count > 0)
+    {
+        Node cur = stack.Pop();
+        if (cur.RightChild == null)
+        {
+            result[cur.Character] = cur.PrefixCode;
+            continue;
+        }
+
+        cur.RightChild.PrefixCode = cur.PrefixCode + "0";
+        cur.Leftchild.PrefixCode += cur.PrefixCode + "1";
+        stack.Push(cur.RightChild);
+        stack.Push(cur.Leftchild);
+    }
+
+    return result;
 }
 
 
 
-
-
-
-
-
-
-
-
-/* foreach (var element in frequencies)
+var frequencies = GetFreqeunciesDictionary("sherlock.txt");
+var prefixCodes = GetCodesForEachSymbol(frequencies);
+foreach (var pair in prefixCodes)
 {
-    Console.WriteLine(element);
+    Console.WriteLine($"element is {pair.Key} and prefix code is {pair.Value}");
 }
-
-Console.WriteLine("           ");
-Console.WriteLine("           ");
-Console.WriteLine("           ");
-Console.WriteLine("           ");
-Console.WriteLine("           ");
-Console.WriteLine("           ");
-for (int i = 0; i < frequencies.Count; i++)
-{
-    Console.WriteLine(huffmanTree.Dequeue());
-}
-*/
