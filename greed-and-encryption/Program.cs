@@ -79,10 +79,12 @@ void EncodeToString(string inputFilePath, string outputFilePath)
     {
         foreach (var pair in prefixCodes)
         {
-            
+            char c = pair.Key.Value;
+            string asciiBinary = Convert.ToString(c, 2);
+            writer.Write(asciiBinary, prefixCodes[c]);
         }
+        writer.Write("00000000");
     }
-
 }
 
 
