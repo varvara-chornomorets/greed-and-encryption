@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Diagnostics.SymbolStore;
 using greed_and_encryption;
 
 Dictionary<char?, int> GetFreqeunciesDictionary(string path)
@@ -77,48 +78,64 @@ void EncodeToString(string inputFilePath, string outputFilePath)
     var frequencies = GetFreqeunciesDictionary(inputFilePath);
     var prefixCodesRoot = GetRoot(frequencies);
     var prefixCodes = GetPrefixCodesFromRoot(prefixCodesRoot);
-    using (StreamWriter writer = new StreamWriter(outputFilePath))
+    using var writer = new StreamWriter(outputFilePath);
+    foreach (var pair in prefixCodes)
     {
-        foreach (var pair in prefixCodes)
-        {
-            char c = pair.Key.Value;
-            string asciiBinary = Convert.ToString(c, 2);
-            for (int i = 0; i < 8 - asciiBinary.Length; i++)
-            {
-                asciiBinary = "0" + asciiBinary;
-            }
-            writer.Write(asciiBinary, prefixCodes[c]);
-        }
-        writer.Write("aaaaaaaa");
-    
-
-        using StreamReader reader = new StreamReader(inputFilePath) ;
-        var text = reader.ReadToEnd();
-        foreach (var c in text)
-        {
-            writer.Write(prefixCodes[c]);
-        }
-        reader.Close();
+        writer.Write($"{pair.Key}|{pair.Value}|");
     }
+        
+    using var reader = new StreamReader(inputFilePath) ;
+    var text = reader.ReadToEnd();
+    foreach (var c in text)
+    {
+        writer.Write(prefixCodes[c]);
+    }
+    reader.Close();
 }
 
 void DecodeString(string fileToDecodePath, string outputFilePath)
 {
-    using StreamReader reader = new StreamReader(fileToDecodePath);
-    var content = reader.ReadToEnd();
-    var cur = "";
-    int counter = 1;
-    while (cur != "aaaaaaaa")
+    using var reader = new StreamReader(fileToDecodePath);
+    using var writer = new StreamWriter(outputFilePath);
     {
-        cur = content.Substring(8 * (counter-1), 8);
-        counter++;
-        Console.WriteLine(cur);
+        
+    }
+    var content = reader.ReadToEnd();
+    // creating a table for decoding
+    var decodingTable = new Dictionary<string, char>();
+    var contents = content.Split( '|' );
+    var even = true;
+    for (var i = 0; i < contents.Length - 1; i++)
+    {
+        if (even)
+        {
+            var symbol = contents[i].ToCharArray()[0];
+            var code = contents[i + 1];
+            decodingTable[code] = symbol;
+        }
+        even = !even;
+    }
 
+    var actualText = contents[^1];
+    var buffer = "";
+    foreach (var c in actualText)
+    {
+        buffer += c;
+        try 
+        {
+            var symbol= decodingTable[buffer];
+            writer.Write(symbol);
+            buffer = "";
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
 
 }
 
 
-// EncodeToString("sherlock.txt", "example.txt");
-// DecodeString("example.txt", "decoded.txt");
+EncodeToString("sherlock.txt", "example.txt");
+DecodeString("example.txt", "decoded.txt");
