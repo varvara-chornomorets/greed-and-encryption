@@ -78,7 +78,6 @@
 			
 		}
 
-
 		public string Encode(string text)
 		{
 			// Build encoding table from Huffman tree
@@ -159,11 +158,22 @@
 				string input = reader.ReadToEnd();
 
 				// applying Huffman encoding to the string
-				string encoded = Encode(input);
-
+				HuffmanTree huffmanTree = new HuffmanTree(input); 
+				Dictionary<char, string> encodingTable = huffmanTree.BuildEncodingTable(); 
+				string encoded = huffmanTree.Encode(input);
+				
 				// write down the length of the encoded text so that you can decode it correctly later
 				writer.Write(encoded.Length);
 
+				// write the encoding table to the binary file 
+				writer.Write(encodingTable.Count); 
+				foreach (KeyValuePair<char, string> entry in encodingTable) 
+				{ 
+					writer.Write(entry.Key); 
+					writer.Write(entry.Value.Length); 
+					writer.Write(entry.Value.ToCharArray()); 
+				}
+				
 				//  write the encoded text to a binary file
 				for (int i = 0; i < encoded.Length; i += 8)
 				{
@@ -222,8 +232,7 @@
 
 			File.WriteAllText(outputFilePath, decoded);
 		}
-
-
+		
 		public string DecodeBytesFromFile(string inputFilePath)
 		{
 			using (var reader = new BinaryReader(new FileStream(inputFilePath, FileMode.Open)))
@@ -231,6 +240,18 @@
 				// read the length of the encoded text that we recorded during encoding
 				int encodedLength = reader.ReadInt32();
 
+				// read the encoding table from the binary file 
+				int tableSize = reader.ReadInt32(); 
+				Dictionary<string, char> decodingTable = new Dictionary<string, char>(tableSize); 
+				for (int i = 0; i < tableSize; i++) 
+				{ 
+					char c = reader.ReadChar(); 
+					int encodingLength = reader.ReadInt32(); 
+					char[] encodingChars = reader.ReadChars(encodingLength); 
+					string encoding = new string(encodingChars); 
+					decodingTable[encoding] = c; 
+				} 
+				
 				// read the encoded text from the binary file
 				byte[] bytes = reader.ReadBytes((int) Math.Ceiling((double) encodedLength / 8));
 				string encoded = "";
@@ -241,9 +262,21 @@
 
 				encoded = encoded.Substring(0, encodedLength);
 				
-				string decoded = Decode(encoded);
-				return decoded;
-			}
+				// decode the text using the decoding table 
+				string decoded = ""; 
+				string currentCode = ""; 
+				foreach (char c in encoded) 
+				{ 
+					currentCode += c; 
+					if (decodingTable.ContainsKey(currentCode)) 
+					{ 
+						decoded += decodingTable[currentCode]; 
+						currentCode = ""; 
+					} 
+				} 
+ 
+				return decoded; 
+			} 
 		}
 
 		public void DecodeBytesFromFileToFile(string inputFilePath, string outputFilePath)
